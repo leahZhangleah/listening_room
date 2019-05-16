@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="calling_number_left_padding">8dp</dimen>
+    <dimen name="calling_number_top_padding">8dp</dimen>
+    <dimen name="passed_number_label_left_padding">8dp</dimen>
+    <dimen name="passed_number_label_top_padding">8dp</dimen>
+    <dimen name="title_padding_left">80dp</dimen>
+    <dimen name="title_padding_right">50dp</dimen>
+    <dimen name="date_text_width">250dp</dimen>
+    <dimen name="hospital_children_playground_name_size">30sp</dimen>
+    <dimen name="content_left_padding">80dp</dimen>
+    <dimen name="content_right_padding">80dp</dimen>
+    <dimen name="content_top_padding">20dp</dimen>
+    <dimen name="content_bottom_padding">20dp</dimen>
+    <dimen name="content_width">1000dp</dimen>
+    <dimen name="content_height">400dp</dimen>
+    <dimen name="each_room_content_width">250dp</dimen>
+    <dimen name="content_room_margin_btw">50dp</dimen>
+    <dimen name="baby_width">100dp</dimen>
+    <dimen name="baby_height">100dp</dimen>
+    <dimen name="content_calling_number_margin_top">20dp</dimen>
+    <dimen name="passed_list_top_margin">40dp</dimen>
+    //change to 450dp later
+</resources>
