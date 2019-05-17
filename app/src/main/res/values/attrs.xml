@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="VerticalScrollLayout">
+        <attr name="vsl_animDuration" format="integer" />
+        <attr name="vsl_sleepTime" format="integer" />
+        <attr name="vsl_isCusDuration" format="boolean" />
+    </declare-styleable>
+</resources>

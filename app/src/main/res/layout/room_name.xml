@@ -2,27 +2,27 @@
 <merge>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="200dp"
-    android:layout_height="100dp"
+    android:layout_width="@dimen/room_name_width"
+    android:layout_height="@dimen/room_name_height"
     android:background="@drawable/title_label">
    <LinearLayout
-       android:layout_marginTop="15dp"
+       android:layout_marginTop="@dimen/room_name_margin_top"
        android:layout_width="match_parent"
        android:layout_height="wrap_content">
        <ImageView
            android:layout_width="0dp"
            android:layout_weight="1"
-           android:layout_height="50dp"
+           android:layout_height="@dimen/room_name_word_size"
            android:src="@drawable/title_first_word" />
        <ImageView
            android:layout_width="0dp"
            android:layout_weight="1"
-           android:layout_height="50dp"
+           android:layout_height="@dimen/room_name_word_size"
            android:src="@drawable/title_second_word"/>
        <ImageView
            android:layout_width="0dp"
            android:layout_weight="1"
-           android:layout_height="50dp"
+           android:layout_height="@dimen/room_name_word_size"
            android:src="@drawable/title_third_word"/>
    </LinearLayout>
 </RelativeLayout>

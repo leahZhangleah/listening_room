@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge>
 <LinearLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginRight="@dimen/content_room_margin_btw"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,6 +9,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
     <TextView
+        android:textStyle="bold"
         android:id="@+id/evaluation_room_label"
         android:textColor="@color/name_color"
         android:layout_width="match_parent"
@@ -15,11 +17,11 @@
         android:layout_weight="2"
         android:gravity="center"
         android:text="测量室119室"
-        android:background="@drawable/yellow_label"/>
+        android:background="@drawable/yellow_label"
+        android:textAppearance="@android:style/TextAppearance.Material.Headline"/>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/evaluation_room_waiting_list"
         android:layout_marginTop="@dimen/content_calling_number_margin_top"
-        android:textColor="@color/calling_number_color"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="4"
@@ -38,15 +40,16 @@
             android:paddingTop="@dimen/passed_number_label_top_padding"
             android:paddingLeft="@dimen/passed_number_label_left_padding"
             android:text="过号"/>
-        <ListView
-            android:transcriptMode="alwaysScroll"
-            android:stackFromBottom="true"
-            android:layout_marginTop="@dimen/passed_list_top_margin"
-            android:id="@+id/evaluation_room_passed_list"
+        <com.example.listeningroom.VerticalScrollLayout
+            app:vsl_isCusDuration="true"
+            app:vsl_sleepTime="2000"
+            app:vsl_animDuration="1000"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:textColor="@color/passed_number_color"
-            android:text="1号 XXX 过号" />
+            android:layout_marginTop="@dimen/passed_list_top_margin"
+            android:id="@+id/evaluation_room_passed_list"
+            android:textColor="@color/passed_number_color">
+        </com.example.listeningroom.VerticalScrollLayout>
     </RelativeLayout>
 </LinearLayout>
 </merge>

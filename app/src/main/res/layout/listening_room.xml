@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge>
+<merge xmlns:app="http://schemas.android.com/apk/res-auto">
 <LinearLayout
     android:layout_marginRight="@dimen/content_room_margin_btw"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -8,6 +8,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
     <TextView
+        android:textAppearance="@android:style/TextAppearance.Material.Headline"
         android:id="@+id/listening_room_label"
         android:textStyle="bold"
         android:textColor="@color/name_color"
@@ -20,7 +21,6 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/listening_room_waiting_list"
         android:layout_marginTop="@dimen/content_calling_number_margin_top"
-        android:textColor="@color/calling_number_color"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="4"
@@ -38,16 +38,17 @@
             android:layout_alignParentLeft="true"
             android:paddingTop="@dimen/passed_number_label_top_padding"
             android:paddingLeft="@dimen/passed_number_label_left_padding"
-            android:text="过号"/>
-        <ListView
-            android:transcriptMode="alwaysScroll"
-            android:stackFromBottom="true"
+            android:text="过号" />
+        <com.example.listeningroom.VerticalScrollLayout
+            app:vsl_isCusDuration="true"
+            app:vsl_sleepTime="2000"
+            app:vsl_animDuration="1000"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_marginTop="@dimen/passed_list_top_margin"
             android:id="@+id/listening_room_passed_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/passed_number_color"
-            android:text="1号 XXX 过号" />
+            android:textColor="@color/passed_number_color">
+        </com.example.listeningroom.VerticalScrollLayout>
     </RelativeLayout>
 </LinearLayout>
 </merge>

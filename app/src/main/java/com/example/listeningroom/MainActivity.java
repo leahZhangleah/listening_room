@@ -10,7 +10,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,7 +33,7 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
     private TextView date_tv,evaluation_room_label,listening_room_label,intelligent_room_label;
     private RecyclerView evaluation_waiting_lv,listening_waiting_lv,intelligent_waiting_lv;
-    private ListView evaluation_passed_ls,listening_passed_ls,intelligent_passed_ls;
+    private VerticalScrollLayout evaluation_passed_ls,listening_passed_ls,intelligent_passed_ls;
     private ChildAdapter evaluation_waiting_adapter,listening_waiting_adapter,intelligent_waiting_adapter;
     private PassedAdapter evaluation_passed_adapter,listening_passed_adapter,intelligent_passed_adapter;
     private TextToSpeech tts;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private int PORT=0;
     List<Child> waitingList;
     ArrayList<Child> passedList;
+    private boolean isTTSInitialised=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         //initPermission();
         initViews();
-        //initTTS();
+        initTTS();
         //connectTcpAndGetData();
         testWithFakeData();
     }
@@ -70,13 +74,35 @@ public class MainActivity extends AppCompatActivity {
         listening_waiting_adapter.setChildList(waitingList);
         intelligent_waiting_adapter.setChildList(waitingList);
 
-        evaluation_passed_adapter.clear();
-        evaluation_passed_adapter.addAll(passedList);
-        listening_passed_adapter.clear();
-        listening_passed_adapter.addAll(passedList);
-        intelligent_passed_adapter.clear();
-        intelligent_passed_adapter.addAll(passedList);
+        evaluation_passed_adapter.setChildList(passedList);
+        listening_passed_adapter.setChildList(passedList);
+        intelligent_passed_adapter.setChildList(passedList);
+
+        //todo:call below code in none oncreate method
+       /* Child child = waitingList.get(0);
+        new VoiceThread(child).start();*/
+
     }
+
+    private class VoiceThread extends Thread{
+        private Child child;
+
+        public VoiceThread(Child child) {
+            this.child = child;
+        }
+
+        @Override
+        public void run() {//control how many times to play this string
+            if(isTTSInitialised){
+                String textToRead = "请"+child.number+"号"+child.name+"测量室测量";
+                for(int i=0;i<2;i++) {
+                    tts.speak(textToRead+",", TextToSpeech.QUEUE_ADD, null);
+                }
+            }
+        }
+    }
+
+
 
     /*private void connectTcpAndGetData() {//链接socket，获取数据
         new Thread(new Runnable() {
@@ -177,18 +203,25 @@ public class MainActivity extends AppCompatActivity {
 
 
         passedList = new ArrayList<>();
-        evaluation_passed_adapter = new PassedAdapter(passedList,this);
-        listening_passed_adapter = new PassedAdapter(passedList,this);
-        intelligent_passed_adapter = new PassedAdapter(passedList,this);
+        evaluation_passed_adapter = new PassedAdapter();
+        listening_passed_adapter = new PassedAdapter();
+        intelligent_passed_adapter = new PassedAdapter();
 
+        //set layout manager
+        LinearLayoutManager evaluation_layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+        LinearLayoutManager listening_layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+        LinearLayoutManager intelligent_layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+        evaluation_waiting_lv.setLayoutManager(evaluation_layoutManager);
+        listening_waiting_lv.setLayoutManager(listening_layoutManager);
+        intelligent_waiting_lv.setLayoutManager(intelligent_layoutManager);
+
+
+        //todo populate data
         //set adapter to recyclerview
         evaluation_waiting_lv.setAdapter(evaluation_waiting_adapter);
         listening_waiting_lv.setAdapter(listening_waiting_adapter);
         intelligent_waiting_lv.setAdapter(intelligent_waiting_adapter);
 
-
-        //todo populate data
-        //adapter.addAll(newUsers);
         evaluation_passed_ls.setAdapter(evaluation_passed_adapter);
         listening_passed_ls.setAdapter(listening_passed_adapter);
         intelligent_passed_ls.setAdapter(intelligent_passed_adapter);
@@ -199,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onInit(int status) {
                 if (status == tts.SUCCESS) {
+                    isTTSInitialised = true;
                     int result = tts.setLanguage(Locale.CHINA);
                     if (result != TextToSpeech.LANG_COUNTRY_AVAILABLE
                             && result != TextToSpeech.LANG_AVAILABLE){

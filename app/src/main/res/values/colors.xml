@@ -2,6 +2,6 @@
 <resources>
     <color name="name_color">@android:color/holo_blue_dark</color>
     <color name="calling_number_color">@android:color/holo_blue_dark</color>
-    <color name="passed_number_label_color">@android:color/black</color>
-    <color name="passed_number_color">@android:color/black</color>
+    <color name="passed_number_label_color">@android:color/darker_gray</color>
+    <color name="passed_number_color">@android:color/darker_gray</color>
 </resources>
