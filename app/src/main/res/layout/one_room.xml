@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge>
+    <LinearLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_marginRight="@dimen/content_room_margin_btw"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="@dimen/each_room_content_width"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:textStyle="bold"
+            android:id="@+id/room_label"
+            android:textColor="@color/name_color"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:text="测量室119室"
+            android:textAppearance="@android:style/TextAppearance.Material.Headline"/>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/room_waiting_list"
+            android:layout_marginTop="@dimen/content_calling_number_margin_top"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="4" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3">
+            <TextView
+                android:textColor="@color/passed_number_label_color"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:paddingTop="@dimen/passed_number_label_top_padding"
+                android:paddingLeft="@dimen/passed_number_label_left_padding"
+                android:text="过号"/>
+            <com.example.listeningroom.VerticalScrollLayout
+                app:vsl_isCusDuration="true"
+                app:vsl_sleepTime="2000"
+                app:vsl_animDuration="1000"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="@dimen/passed_list_top_margin"
+                android:id="@+id/room_passed_list"
+                android:textColor="@color/passed_number_color">
+            </com.example.listeningroom.VerticalScrollLayout>
+        </RelativeLayout>
+    </LinearLayout>
+</merge>

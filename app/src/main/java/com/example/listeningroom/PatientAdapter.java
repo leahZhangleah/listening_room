@@ -14,36 +14,38 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.ViewHolder> {
-    List<Child> childList;
+public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHolder> {
+    List<Waitmsg> waitList;
     Context context;
+    WaitingCallback waitingCallback;
 
-    public ChildAdapter(List<Child> childList, Context context) {
-        this.childList = childList;
+    public PatientAdapter(WaitingCallback waitingCallback,Context context) {
         this.context = context;
+        this.waitingCallback=waitingCallback;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.child_item,viewGroup,false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.patient_item,viewGroup,false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-        Child child = childList.get(i);
-        if(child!=null){
-            viewHolder.child_num_tv.setText(String.valueOf(child.getNumber()+"号"));
-            viewHolder.child_name_tv.setText(child.getName());
-            viewHolder.child_status_tv.setText(child.getStatus());
+        Waitmsg patient = waitList.get(i);
+        if(patient!=null){
+            viewHolder.child_num_tv.setText(String.valueOf(patient.getPdhm()+"号"));
+            viewHolder.child_name_tv.setText(patient.getBrxm());
+            viewHolder.child_status_tv.setText("等待");
         }
-        if(i==0 && childList.get(i)!=null){
+        if(i==0 && waitList.get(i)!=null){
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.topMargin = dp2px(context,15);
             params.bottomMargin = dp2px(context,15);
             viewHolder.itemView.setLayoutParams(params);
             adoptAnimation(context,viewHolder.itemView);
+            viewHolder.child_status_tv.setText("检查");
         }
     }
 
@@ -52,18 +54,27 @@ public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.ViewHolder> 
     }
 
 
-    public void setChildList(List<Child> newChildList){
+    public void setPatientList(List<Waitmsg> newPatientList){
         //todo
-        this.childList = newChildList;
+        if(this.waitList.get(0)!=newPatientList.get(0)){
+            this.waitList = newPatientList;
+            notifyDataSetHasChanged();
+        }
+    }
+
+    private void notifyDataSetHasChanged(){
         notifyDataSetChanged();
+        if(waitList.get(0)!=null){
+            waitingCallback.addNewSpeech(waitList.get(0));
+        }
     }
 
     @Override
     public int getItemCount() {
-        if(childList.size()>5){
+        if(waitList.size()>5){
             return 5;
         }else{
-            return childList.size();
+            return waitList.size();
         }
     }
 
