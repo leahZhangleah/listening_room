@@ -18,7 +18,7 @@ public class PassedAdapter extends BaseAdapter {
     }
 
     public void setPatientList(List<Ghmsg> newPatientList){
-        if(this.patientList.get(0)!=newPatientList.get(0)){
+        if(this.patientList!=newPatientList){
             this.patientList = newPatientList;
             notifyDataSetChanged();
         }

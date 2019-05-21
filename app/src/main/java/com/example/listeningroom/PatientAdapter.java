@@ -12,6 +12,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHolder> {
@@ -21,6 +22,7 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
 
     public PatientAdapter(WaitingCallback waitingCallback,Context context) {
         this.context = context;
+        waitList = new ArrayList<>();
         this.waitingCallback=waitingCallback;
     }
 
@@ -56,7 +58,7 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
 
     public void setPatientList(List<Waitmsg> newPatientList){
         //todo
-        if(this.waitList.get(0)!=newPatientList.get(0)){
+        if(this.waitList!=newPatientList){
             this.waitList = newPatientList;
             notifyDataSetHasChanged();
         }
@@ -65,7 +67,7 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
     private void notifyDataSetHasChanged(){
         notifyDataSetChanged();
         if(waitList.get(0)!=null){
-            waitingCallback.addNewSpeech(waitList.get(0));
+            waitingCallback.addNewSpeech(waitList.get(0                                                         ));
         }
     }
 

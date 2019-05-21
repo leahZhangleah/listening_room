@@ -7,12 +7,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.Voice;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,9 +43,10 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
     List<Ghmsg> evaluationRmPL,listeningRmPL,intelligentRmPL;
     private boolean isTTSInitialised=false;
     List<ListeningRoomResponse> responses;
-    private String IP_ADDRESS= "";
-    private int PORT=0;
+    private String IP_ADDRESS= "192.168.11.127";
+    private int PORT=7001;
     private Handler voiceHandler;
+    private  Socket socket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,17 +93,22 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
 
     @Override
     public void addNewSpeech(Waitmsg waitmsg) {
-            Message voice = Message.obtain();
+            /*Message voice = Message.obtain();
             voice.obj = waitmsg;
             voice.what = 0x124;
-            voiceHandler.sendMessage(voice);
+            voiceHandler.sendMessage(voice);*/
+            new VoiceThread(waitmsg).start();
     }
 
     private class VoiceThread extends Thread{
+        Waitmsg waitmsg;
 
+        public VoiceThread(Waitmsg waitmsg){
+            this.waitmsg = waitmsg;
+        }
         @Override
         public void run() {//control how many times to play this string
-            Looper.prepare();
+            /*Looper.prepare();
             voiceHandler = new Handler(){
                 @Override
                 public void handleMessage(Message msg) {
@@ -117,7 +125,14 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
                     }
                 }
             };
-            Looper.loop();
+            Looper.loop();*/
+            if(isTTSInitialised){
+                //Waitmsg waitmsg = (Waitmsg) msg.obj;
+                String textToRead = "请"+waitmsg.getPdhm()+"号"+waitmsg.getBrxm()+"到测量室测量"; //todo, change room name
+                for(int i=0;i<3;i++) {
+                    tts.speak(textToRead+",", TextToSpeech.QUEUE_ADD, null);
+                }
+            }
         }
     }
 
@@ -127,63 +142,52 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                InputStream in = null;
+                BufferedReader bufferedReader = null;
                 while (true) {
                     String line = null;
                     try {
-                        Socket socket = new Socket(IP_ADDRESS, PORT);
-                        InputStream in = socket.getInputStream();
+                        socket = new Socket(IP_ADDRESS, PORT);
+                        socket.setSoTimeout(20000);
+                        in = socket.getInputStream();
                         BufferedReader bufr = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+                        Log.e("socket","准备读消息");
                         while ((line = bufr.readLine()) != null) {
+                            Log.e("line",line);
                             ListeningRoomResponse[] listeningRoomResponse = new Gson().fromJson(line, ListeningRoomResponse[].class);
                             //responses = Arrays.asList(listeningRoomResponse);
                             Message msg = Message.obtain();
                             msg.obj = listeningRoomResponse;
                             msg.what = 0x123;
                             handler.sendMessage(msg);
-
-/*
-                            for (int i = 0; i < responses.size(); i++) {
-                                CallNum  callNum = new CallNum();
-                                String patientName = cs[i].getBrxm();
-                                String roomNum = cs[i].getFjmc();
-                                String num = cs[i].getPdhm();
-                                callNum.setPatientName(patientName);
-                                callNum.setRoomNum(roomNum);
-                                callNum.setNum(num + "号");
-
-                                BuildPlayStr buildPlayStr = new BuildPlayStr(cs, callNum, i, patientName, roomNum, num).invoke();
-                                num = buildPlayStr.getNum();
-                                Integer playCnt = buildPlayStr.getPlayCnt();
-                                String playStr = buildPlayStr.getPlayStr();
-
-
-
-                                if ((cs[i].getYsgy() != null && !cs[i].getYsgy().equals("过号")) &&
-                                        (patientName != null && !patientName.equals("")) && (num != null && !num.equals(""))) {
-                                    if (playCnt < 2) {
-                                        App.patients.put(callNum.getPatientName(), callNum);
-                                        Message voice = Message.obtain();
-
-                                        PlayStrModel playStrModel = new PlayStrModel();
-                                        playStrModel.setPatientNam(callNum.getPatientName());
-
-                                        String tPlayStr =playStr.substring(0,playStr.indexOf("||"));
-
-                                        playStrModel.setPlayStr(tPlayStr);
-                                        voice.obj = playStrModel;
-                                        voice.what = 0x124;
-                                        voiceHandle.sendMessage(voice);
-                                        hasPlayMap.put(playStr, playCnt += 1);
-                                    }
-                                }
-                            }*/
                         }
 
                     } catch (IOException e) {
                         e.printStackTrace();
+                    }finally{
+                        if (socket != null) {
+                            try {
+                                socket.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        if (bufferedReader != null) {
+                            try {
+                                bufferedReader.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        if (in != null) {
+                            try {
+                                in.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 }
-
             }
         }).start();
     }
@@ -199,31 +203,34 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
                     responses = Arrays.asList((ListeningRoomResponse[]) msg.obj);
                     for(int i=0; i<responses.size();i++){
                         ListeningRoomResponse response = responses.get(i);
-                        if(response.getFjmc()=="测量室"){
+                        Log.e("response","patient name:"+response.getBrxm()+"patient number:"+response.getPdhm()+"room name:"+response.getFjmc());
+                        if(response.getFjmc().equals("room1")){
+                            evaluation_room_label.setText(response.getFjmc());
                             evaluationRmWL = response.getWaitmsg();
                             evaluationRmPL = response.getGhmsg();
                             evaluation_waiting_adapter.setPatientList(evaluationRmWL);
                             evaluation_passed_adapter.setPatientList(evaluationRmPL);
-                        }else if(response.getFjmc()=="听力室"){
+                        }else if(response.getFjmc().equals("room2")){
+                            listening_room_label.setText(response.getFjmc());
                             listeningRmWL = response.getWaitmsg();
                             listeningRmPL = response.getGhmsg();
                             listening_waiting_adapter.setPatientList(listeningRmWL);
                             listening_passed_adapter.setPatientList(listeningRmPL);
-                        }else if(response.getFjmc()=="智测室"){
+                        }else if(response.getFjmc().equals("room3")){
+                            intelligent_room_label.setText(response.getFjmc());
                             intelligentRmWL = response.getWaitmsg();
                             intelligentRmPL = response.getGhmsg();
                             intelligent_waiting_adapter.setPatientList(intelligentRmWL);
                             intelligent_passed_adapter.setPatientList(intelligentRmPL);
                         }
                     }
-                    //todo, set list for different adapters
-                    //adapter.setData((List<ConsultingRecord>) msg.obj);
                     break;
             }
         }
     };
 
     private void initViews() {
+        //new VoiceThread().start();
         date_tv = findViewById(R.id.date_tv);
         /*evaluationRm = findViewById(R.id.evaluation_room);
         evaluation_room_label = evaluationRm.findViewById(R.id.room_label);
