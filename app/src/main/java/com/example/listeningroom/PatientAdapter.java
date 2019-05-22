@@ -1,6 +1,7 @@
 package com.example.listeningroom;
 
 import android.content.Context;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
@@ -19,6 +20,7 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
     List<Waitmsg> waitList;
     Context context;
     WaitingCallback waitingCallback;
+    Animation blinkAnim;
 
     public PatientAdapter(WaitingCallback waitingCallback,Context context) {
         this.context = context;
@@ -34,7 +36,7 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+    public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
         Waitmsg patient = waitList.get(i);
         if(patient!=null){
             viewHolder.child_num_tv.setText(String.valueOf(patient.getPdhm()+"号"));
@@ -81,10 +83,12 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
     }
 
     private void adoptAnimation(Context context,View view){
-        Animation blinkAnim = AnimationUtils.loadAnimation(context,R.anim.blink);
+        blinkAnim = AnimationUtils.loadAnimation(context,R.anim.blink);
+        blinkAnim.setRepeatCount(10);
         //blinkAnim.restrictDuration(3000);
         view.startAnimation(blinkAnim);
     }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView child_num_tv,child_name_tv,child_status_tv;
