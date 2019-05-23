@@ -102,7 +102,7 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
 
     private void adoptAnimation(Context context,View view){
         blinkAnim = AnimationUtils.loadAnimation(context,R.anim.blink);
-        blinkAnim.setRepeatCount(10);
+        blinkAnim.restrictDuration(3000);
         //blinkAnim.restrictDuration(3000);
         view.startAnimation(blinkAnim);
     }
