@@ -42,10 +42,28 @@ public class PassedAdapter extends BaseAdapter {
         child_name_tv.setTextColor(context.getResources().getColor(R.color.passed_number_color));
         child_status_tv.setTextColor(context.getResources().getColor(R.color.passed_number_color));
         child_num_tv.setText(patient.getPdhm()+"号");
-        child_name_tv.setText(patient.getBrxm());
+        String name = changePatientName(patient.getBrxm());
+        child_name_tv.setText(name);
         child_status_tv.setText("过号");
 
         return convertView;
+    }
+
+    private String changePatientName(String name){
+        int lastLen = name.length();
+        if (name.contains("(") || name.contains("（")) {
+            lastLen = name.contains("(") ? name.indexOf("(") : name.indexOf("（");
+        }
+        switch (lastLen) {
+            case 2:
+            case 3:
+                name = name.substring(0, 1) + "*" + name.substring(lastLen-1, name.length()) ;
+                break;
+            case 4:
+                name = name.substring(0, 1) + "**" + name.substring(lastLen-1, name.length()) ;
+                break;
+        }
+        return name;
     }
 
     @Override

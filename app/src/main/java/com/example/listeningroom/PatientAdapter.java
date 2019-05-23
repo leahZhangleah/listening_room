@@ -40,7 +40,8 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
         Waitmsg patient = waitList.get(i);
         if(patient!=null){
             viewHolder.child_num_tv.setText(String.valueOf(patient.getPdhm()+"号"));
-            viewHolder.child_name_tv.setText(patient.getBrxm());
+            String name = changePatientName(patient.getBrxm());
+            viewHolder.child_name_tv.setText(name);
             viewHolder.child_status_tv.setText("等待");
         }
         if(i==0 && waitList.get(i)!=null){
@@ -51,6 +52,23 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
             adoptAnimation(context,viewHolder.itemView);
             viewHolder.child_status_tv.setText("检查");
         }
+    }
+
+    private String changePatientName(String name){
+        int lastLen = name.length();
+        if (name.contains("(") || name.contains("（")) {
+            lastLen = name.contains("(") ? name.indexOf("(") : name.indexOf("（");
+        }
+        switch (lastLen) {
+            case 2:
+            case 3:
+                name = name.substring(0, 1) + "*" + name.substring(lastLen-1, name.length()) ;
+                break;
+            case 4:
+                name = name.substring(0, 1) + "**" + name.substring(lastLen-1, name.length()) ;
+                break;
+        }
+        return name;
     }
 
     private int dp2px(Context context,float dp){

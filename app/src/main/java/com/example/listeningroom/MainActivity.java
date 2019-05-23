@@ -14,11 +14,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.lzy.okhttputils.OkHttpUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,8 +29,18 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements WaitingCallback {
     private TextView date_tv,evaluation_room_label,listening_room_label,intelligent_room_label;
@@ -45,18 +57,82 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
     List<ListeningRoomResponse> responses;
     private String IP_ADDRESS= "192.168.11.127";
     private int PORT=7001;
+    private static final String ERROR_LOG = "10.97.160.13:8281/lcdLog/save";
+    private static final int TIME_ERROR = 0x1;
     private Handler voiceHandler;
     private  Socket socket;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //initPermission();
+        initPermission();
+        initDateView();
         initViews();
         initTTS();
         connectTcpAndGetData();
         //testWithFakeData();
+    }
+
+    private void initDateView() {
+        date_tv = findViewById(R.id.date_tv);
+        startTimeThread();
+
+    }
+
+    private void startTimeThread() {
+        new Thread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true){
+                            try{
+                                Thread.sleep(1000);
+                                Message msg = Message.obtain();
+                                msg.what = 0x125;
+                                handler.sendMessage(msg);
+                            }catch (InterruptedException e){
+                                Test(e,TIME_ERROR);
+                                Log.e("read time error",e.getMessage());
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+        ).start();
+    }
+
+    public void Test(Exception e, int position) {
+        //  post请求body
+        Map map = new HashMap();
+        map.put("content", e.getMessage() + "位置:" + position);
+        map.put("type", 1);
+
+        Gson gson = new Gson();
+//  转换层json字符串
+        final String s = gson.toJson(map);
+//  创建  RequestBody
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), s);
+//  获取OkhthpClient 实例
+        OkHttpClient okHttpClient1 = OkHttpUtils.getInstance().getOkHttpClient();
+
+//  创建请求
+        Request request = new Request.Builder().url(ERROR_LOG)
+                .post(requestBody).build();
+//  请求网络
+        okHttpClient1.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("sss", "onFailure");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String string = response.body().string();
+                Log.e("sss", string);
+            }
+        });
     }
 
 
@@ -135,6 +211,8 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
             }
         }
     }
+
+
 
 
 
@@ -225,28 +303,16 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
                         }
                     }
                     break;
+                case 0x125:
+                    long sysTime = System.currentTimeMillis();
+                    CharSequence sysTimeStr = DateFormat.format("yyyy-MM-dd  EEEE  HH:mm:ss", sysTime);
+                    date_tv.setText(sysTimeStr);
+                    break;
             }
         }
     };
 
     private void initViews() {
-        //new VoiceThread().start();
-        date_tv = findViewById(R.id.date_tv);
-        /*evaluationRm = findViewById(R.id.evaluation_room);
-        evaluation_room_label = evaluationRm.findViewById(R.id.room_label);
-        evaluation_waiting_lv = evaluationRm.findViewById(R.id.room_waiting_list);
-        evaluation_passed_ls = evaluationRm.findViewById(R.id.room_passed_list);
-
-        listeningRm = findViewById(R.id.listening_room);
-        listening_room_label = evaluationRm.findViewById(R.id.room_label);
-        listening_waiting_lv = evaluationRm.findViewById(R.id.room_waiting_list);
-        listening_passed_ls = evaluationRm.findViewById(R.id.room_passed_list);
-
-        intelligentRm = findViewById(R.id.intelligent_room);
-
-        */
-
-
         evaluation_room_label = findViewById(R.id.evaluation_room_label);
         listening_room_label = findViewById(R.id.listening_room_label);
         intelligent_room_label = findViewById(R.id.intelligent_room_label);
@@ -318,13 +384,8 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
     private void initPermission() {
         String[] permissions = {
                 Manifest.permission.INTERNET,
-                Manifest.permission.ACCESS_NETWORK_STATE,
-                Manifest.permission.MODIFY_AUDIO_SETTINGS,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_SETTINGS,
-                Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.ACCESS_WIFI_STATE,
-                Manifest.permission.CHANGE_WIFI_STATE
+                Manifest.permission.WAKE_LOCK,
+                Manifest.permission.RECEIVE_BOOT_COMPLETED,
         };
 
         ArrayList<String> toApplyList = new ArrayList<String>();
