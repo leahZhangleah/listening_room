@@ -16,6 +16,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,6 +68,9 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);//隐藏标题
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//设置成全屏模式
         setContentView(R.layout.activity_main);
         initPermission();
         initDateView();
@@ -284,19 +289,25 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
                         Log.e("response","patient name:"+response.getBrxm()+"patient number:"+response.getPdhm()+"room name:"+response.getFjmc());
                         if(response.getFjmc().equals("room1")){
                             evaluation_room_label.setText(response.getFjmc());
+                            Waitmsg currentPatient = new Waitmsg(response.getFjmc(),response.getBrxm(),response.getPdhm());
                             evaluationRmWL = response.getWaitmsg();
+                            evaluationRmWL.add(0,currentPatient);
                             evaluationRmPL = response.getGhmsg();
                             evaluation_waiting_adapter.setPatientList(evaluationRmWL);
                             evaluation_passed_adapter.setPatientList(evaluationRmPL);
                         }else if(response.getFjmc().equals("room2")){
                             listening_room_label.setText(response.getFjmc());
+                            Waitmsg currentPatient = new Waitmsg(response.getFjmc(),response.getBrxm(),response.getPdhm());
                             listeningRmWL = response.getWaitmsg();
+                            listeningRmWL.add(0,currentPatient);
                             listeningRmPL = response.getGhmsg();
                             listening_waiting_adapter.setPatientList(listeningRmWL);
                             listening_passed_adapter.setPatientList(listeningRmPL);
                         }else if(response.getFjmc().equals("room3")){
                             intelligent_room_label.setText(response.getFjmc());
+                            Waitmsg currentPatient = new Waitmsg(response.getFjmc(),response.getBrxm(),response.getPdhm());
                             intelligentRmWL = response.getWaitmsg();
+                            intelligentRmWL.add(0,currentPatient);
                             intelligentRmPL = response.getGhmsg();
                             intelligent_waiting_adapter.setPatientList(intelligentRmWL);
                             intelligent_passed_adapter.setPatientList(intelligentRmPL);
