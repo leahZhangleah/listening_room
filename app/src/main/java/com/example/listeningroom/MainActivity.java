@@ -2,22 +2,24 @@ package com.example.listeningroom;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
-import android.speech.tts.Voice;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +48,10 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements WaitingCallback {
     private TextView date_tv,evaluation_room_label,listening_room_label,intelligent_room_label;
+    private TextView er_patient_number,er_patient_name,er_patient_status;
+    private TextView lr_patient_number,lr_patient_name,lr_patient_status;
+    private TextView ir_patient_number,ir_patient_name,ir_patient_status;
+    private View er_current_patient,lr_current_patient,ir_current_patient;
     //private TextView firstPatientNumber,first
     //private LinearLayout evaluationRm,listeningRm,intelligentRm;
     private RecyclerView evaluation_waiting_lv,listening_waiting_lv,intelligent_waiting_lv;
@@ -57,12 +63,13 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
     List<Ghmsg> evaluationRmPL,listeningRmPL,intelligentRmPL;
     private boolean isTTSInitialised=false;
     List<ListeningRoomResponse> responses;
-    private String IP_ADDRESS= "192.168.11.127";
-    private int PORT=7001;
+    private String IP_ADDRESS= "192.168.100.127";
+    private int PORT=10003;
     private static final String ERROR_LOG = "10.97.160.13:8281/lcdLog/save";
     private static final int TIME_ERROR = 0x1;
     private Handler voiceHandler;
     private  Socket socket;
+    private Waitmsg patient1,patient2,patient3;
 
 
     @Override
@@ -98,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
                                 msg.what = 0x125;
                                 handler.sendMessage(msg);
                             }catch (InterruptedException e){
-                                Test(e,TIME_ERROR);
+                                //Test(e,TIME_ERROR);
                                 Log.e("read time error",e.getMessage());
                                 e.printStackTrace();
                             }
@@ -209,7 +216,14 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
             Looper.loop();*/
             if(isTTSInitialised){
                 //Waitmsg waitmsg = (Waitmsg) msg.obj;
-                String textToRead = "请"+waitmsg.getPdhm()+"号"+waitmsg.getBrxm()+"到测量室测量"; //todo, change room name
+                /*if(waitmsg.getFjmc().contains("测量")){
+                    adoptAnimation(MainActivity.this,er_current_patient);
+                }else if(waitmsg.getFjmc().contains("听力")){
+                    adoptAnimation(MainActivity.this,lr_current_patient);
+                }else if(waitmsg.getFjmc().contains("智测")){
+                    adoptAnimation(MainActivity.this,ir_current_patient);
+                }*/
+                String textToRead = "请"+waitmsg.getPdhm()+"号"+waitmsg.getBrxm()+"到"+waitmsg.getFjmc()+"测量"; //todo, change room name
                 for(int i=0;i<3;i++) {
                     tts.speak(textToRead+",", TextToSpeech.QUEUE_ADD, null);
                 }
@@ -287,29 +301,53 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
                     for(int i=0; i<responses.size();i++){
                         ListeningRoomResponse response = responses.get(i);
                         Log.e("response","patient name:"+response.getBrxm()+"patient number:"+response.getPdhm()+"room name:"+response.getFjmc());
-                        if(response.getFjmc().equals("room1")){
+                        if(response.getFjmc().contains("测量")){
                             evaluation_room_label.setText(response.getFjmc());
                             Waitmsg currentPatient = new Waitmsg(response.getFjmc(),response.getBrxm(),response.getPdhm());
+                            if(!currentPatient.getPdhm().equals(patient1.getPdhm())){
+                                patient1 = currentPatient;
+                                adoptAnimation(MainActivity.this,er_current_patient);
+                                er_patient_name.setText(changePatientName(currentPatient.getBrxm()));
+                                er_patient_number.setText(currentPatient.getPdhm()+"号");
+                                er_patient_status.setText("检查");
+                                new VoiceThread(currentPatient).start();
+                            }
+                            evaluationRmWL.clear();
                             evaluationRmWL = response.getWaitmsg();
-                            evaluationRmWL.add(0,currentPatient);
-                            evaluationRmPL = response.getGhmsg();
                             evaluation_waiting_adapter.setPatientList(evaluationRmWL);
+                            evaluationRmPL = response.getGhmsg();
                             evaluation_passed_adapter.setPatientList(evaluationRmPL);
-                        }else if(response.getFjmc().equals("room2")){
+                        }else if(response.getFjmc().contains("听力")){
                             listening_room_label.setText(response.getFjmc());
-                            Waitmsg currentPatient = new Waitmsg(response.getFjmc(),response.getBrxm(),response.getPdhm());
+                            Waitmsg currentPatient = new Waitmsg(response.getFjmc()+"室",response.getBrxm(),response.getPdhm());
+                            if(!currentPatient.getPdhm().equals(patient2.getPdhm())){
+                                patient2 = currentPatient;
+                               adoptAnimation(MainActivity.this,lr_current_patient);
+                                lr_patient_name.setText(changePatientName(currentPatient.getBrxm()));
+                                lr_patient_number.setText(currentPatient.getPdhm()+"号");
+                                lr_patient_status.setText("检查");
+                                new VoiceThread(currentPatient).start();
+                            }
+                            listeningRmWL.clear();
                             listeningRmWL = response.getWaitmsg();
-                            listeningRmWL.add(0,currentPatient);
-                            listeningRmPL = response.getGhmsg();
                             listening_waiting_adapter.setPatientList(listeningRmWL);
+                            listeningRmPL = response.getGhmsg();
                             listening_passed_adapter.setPatientList(listeningRmPL);
-                        }else if(response.getFjmc().equals("room3")){
+                        }else if(response.getFjmc().contains("智测")){
                             intelligent_room_label.setText(response.getFjmc());
                             Waitmsg currentPatient = new Waitmsg(response.getFjmc(),response.getBrxm(),response.getPdhm());
+                            if(!currentPatient.getPdhm().equals(patient3.getPdhm())){
+                                patient3 = currentPatient;
+                                adoptAnimation(MainActivity.this,ir_current_patient);
+                                ir_patient_name.setText(changePatientName(currentPatient.getBrxm()));
+                                ir_patient_number.setText(currentPatient.getPdhm()+"号");
+                                ir_patient_status.setText("检查");
+                                new VoiceThread(currentPatient).start();
+                            }
+                            intelligentRmWL.clear();
                             intelligentRmWL = response.getWaitmsg();
-                            intelligentRmWL.add(0,currentPatient);
-                            intelligentRmPL = response.getGhmsg();
                             intelligent_waiting_adapter.setPatientList(intelligentRmWL);
+                            intelligentRmPL = response.getGhmsg();
                             intelligent_passed_adapter.setPatientList(intelligentRmPL);
                         }
                     }
@@ -323,6 +361,31 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
         }
     };
 
+    private String changePatientName(String name){
+        int lastLen = name.length();
+        if (name.contains("(") || name.contains("（")) {
+            lastLen = name.contains("(") ? name.indexOf("(") : name.indexOf("（");
+        }
+        switch (lastLen) {
+            case 2:
+            case 3:
+                name = name.substring(0, 1) + "*" + name.substring(lastLen-1, name.length()) ;
+                break;
+            case 4:
+                name = name.substring(0, 1) + "**" + name.substring(lastLen-1, name.length()) ;
+                break;
+        }
+        return name;
+    }
+
+    private void adoptAnimation(Context context, View view){
+        Animation blinkAnim;
+        blinkAnim = AnimationUtils.loadAnimation(context,R.anim.blink);
+        blinkAnim.restrictDuration(2000);
+        //blinkAnim.restrictDuration(3000);
+        view.startAnimation(blinkAnim);
+    }
+
     private void initViews() {
         evaluation_room_label = findViewById(R.id.evaluation_room_label);
         listening_room_label = findViewById(R.id.listening_room_label);
@@ -335,6 +398,25 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
         evaluation_waiting_lv = findViewById(R.id.evaluation_room_waiting_list);
         listening_waiting_lv = findViewById(R.id.listening_room_waiting_list);
         intelligent_waiting_lv = findViewById(R.id.intelligent_room_waiting_list);
+
+
+        er_current_patient = findViewById(R.id.evaluation_room_current_patient);
+        er_patient_name = er_current_patient.findViewById(R.id.child_name);
+        er_patient_number = er_current_patient.findViewById(R.id.child_number);
+        er_patient_status = er_current_patient.findViewById(R.id.child_status);
+
+
+        lr_current_patient = findViewById(R.id.listening_room_current_patient);
+        lr_patient_name = lr_current_patient.findViewById(R.id.child_name);
+        lr_patient_number = lr_current_patient.findViewById(R.id.child_number);
+        lr_patient_status = lr_current_patient.findViewById(R.id.child_status);
+
+
+        ir_current_patient = findViewById(R.id.intelligent_room_current_patient);
+        ir_patient_name = ir_current_patient.findViewById(R.id.child_name);
+        ir_patient_number =ir_current_patient.findViewById(R.id.child_number);
+        ir_patient_status = ir_current_patient.findViewById(R.id.child_status);
+
 
         //todo assign value to adapter after
         evaluationRmWL = new ArrayList();
@@ -373,6 +455,10 @@ public class MainActivity extends AppCompatActivity implements WaitingCallback {
         evaluation_passed_ls.setAdapter(evaluation_passed_adapter);
         listening_passed_ls.setAdapter(listening_passed_adapter);
         intelligent_passed_ls.setAdapter(intelligent_passed_adapter);
+
+        patient1 = new Waitmsg("","","");
+        patient2 = new Waitmsg("","","");
+        patient3 = new Waitmsg("","","");
     }
 
     private void initTTS() {

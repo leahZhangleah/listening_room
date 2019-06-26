@@ -18,13 +18,27 @@
         android:gravity="center"
         android:text="测量室119室"
         android:background="@drawable/blue_label"/>
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/listening_room_waiting_list"
-        android:layout_marginTop="@dimen/content_calling_number_margin_top"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="4"
-        android:background="@drawable/blue_waiting"/>
+        android:background="@drawable/blue_waiting">
+        <include
+            android:id="@+id/listening_room_current_patient"
+            layout="@layout/patient_item">
+        </include>
+        <!--TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/listening_room_current_patient"/-->
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/listening_room_waiting_list"
+            android:layout_marginTop="@dimen/content_calling_number_margin_top"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

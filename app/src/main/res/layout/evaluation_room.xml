@@ -19,13 +19,26 @@
         android:text="测量室119室"
         android:background="@drawable/yellow_label"
         android:textAppearance="@android:style/TextAppearance.Material.Headline"/>
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/evaluation_room_waiting_list"
-        android:layout_marginTop="@dimen/content_calling_number_margin_top"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="4"
-        android:background="@drawable/yellow_waiting"/>
+        android:background="@drawable/yellow_waiting">
+        <include
+            android:id="@+id/evaluation_room_current_patient"
+            layout="@layout/patient_item">
+        </include>
+        <!--TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/evaluation_room_current_patient"/-->
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/evaluation_room_waiting_list"
+            android:layout_marginTop="@dimen/content_calling_number_margin_top"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

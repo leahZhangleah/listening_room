@@ -21,11 +21,13 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
     Context context;
     WaitingCallback waitingCallback;
     Animation blinkAnim;
+    Waitmsg currentPaitent;
 
     public PatientAdapter(WaitingCallback waitingCallback,Context context) {
         this.context = context;
         waitList = new ArrayList<>();
         this.waitingCallback=waitingCallback;
+        currentPaitent = new Waitmsg("","","");
     }
 
     @NonNull
@@ -44,14 +46,14 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
             viewHolder.child_name_tv.setText(name);
             viewHolder.child_status_tv.setText("等待");
         }
-        if(i==0 && waitList.get(i)!=null){
+       /* if(i==0 && waitList.get(i)!=null){
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.topMargin = dp2px(context,15);
             params.bottomMargin = dp2px(context,15);
             viewHolder.itemView.setLayoutParams(params);
             adoptAnimation(context,viewHolder.itemView);
             viewHolder.child_status_tv.setText("检查");
-        }
+        }*/
     }
 
     private String changePatientName(String name){
@@ -78,16 +80,18 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
 
     public void setPatientList(List<Waitmsg> newPatientList){
         //todo
-        if(this.waitList!=newPatientList){
-            this.waitList = newPatientList;
-            notifyDataSetHasChanged();
+        if(!this.waitList.equals(newPatientList)){
+            waitList.clear();
+            waitList.addAll(newPatientList);
+            //this.waitList = newPatientList;
+            notifyDataSetChanged();
+            //notifyDataSetHasChanged();
         }
     }
 
     private void notifyDataSetHasChanged(){
-        notifyDataSetChanged();
-        if(waitList.get(0)!=null){
-            waitingCallback.addNewSpeech(waitList.get(0                                                         ));
+        if(waitList.get(0)!=null&&waitList.get(0).getBrxm()!=currentPaitent.getBrxm()){
+            waitingCallback.addNewSpeech(waitList.get(0));
         }
     }
 
